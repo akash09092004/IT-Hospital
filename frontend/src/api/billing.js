@@ -1,4 +1,4 @@
-﻿import axios from "axios";
+﻿import api from "./client";
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
@@ -10,16 +10,16 @@ const getAuthHeaders = () => {
 };
 
 export const listBillings = () =>
-  axios.get("/api/billing", {
+  api.get("/api/billing", {
     headers: getAuthHeaders(),
   });
 
 export const createBilling = (data) =>
-  axios.post("/api/billing", data, {
+  api.post("/api/billing", data, {
     headers: getAuthHeaders(),
   });
 
 export const deleteBillingById = (id) =>
-  axios.delete(`/api/billing/${id}`, {
+  api.delete(`/api/billing/${id}`, {
     headers: getAuthHeaders(),
   });

@@ -1,4 +1,4 @@
-﻿import axios from "axios";
+﻿import api from "./client";
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
@@ -7,21 +7,21 @@ const getAuthHeaders = () => {
 };
 
 export const createAppointment = (data) =>
-  axios.post("/api/appointments", data, {
+  api.post("/api/appointments", data, {
     headers: getAuthHeaders(),
   });
 
 export const listAppointments = () =>
-  axios.get("/api/appointments", {
+  api.get("/api/appointments", {
     headers: getAuthHeaders(),
   });
 
 export const updateAppointment = (id, data) =>
-  axios.put(`/api/appointments/${id}`, data, {
+  api.put(`/api/appointments/${id}`, data, {
     headers: getAuthHeaders(),
   });
 
 export const deleteAppointment = (id) =>
-  axios.delete(`/api/appointments/${id}`, {
+  api.delete(`/api/appointments/${id}`, {
     headers: getAuthHeaders(),
   });
