@@ -1,6 +1,13 @@
+<<<<<<< HEAD
 import React, { useState } from "react";
 import { TextField, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+=======
+﻿import React, { useState } from "react";
+import { Alert, TextField, Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { login } from "../api/auth";
+>>>>>>> 5c6c36bfa0044bb29ff1e488d287aec5d0784622
 
 export default function Login() {
   const navigate = useNavigate();
@@ -9,15 +16,22 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+<<<<<<< HEAD
   const handleLogin = (e) => {
     e.preventDefault();
 
     // Validation
+=======
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+>>>>>>> 5c6c36bfa0044bb29ff1e488d287aec5d0784622
     if (!email || !password) {
       setError("Please enter email and password!");
       return;
     }
 
+<<<<<<< HEAD
     // LocalStorage se user data read
     const storedUser = JSON.parse(localStorage.getItem("hospitalUser"));
 
@@ -39,6 +53,19 @@ export default function Login() {
       navigate("/dashboard");
     } else {
       setError("Invalid email or password!");
+=======
+    try {
+      setError("");
+      const res = await login({ email, password });
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("currentUser", JSON.stringify(res.user));
+      navigate("/dashboard");
+    } catch (err) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("currentUser");
+      setError(err?.response?.data?.message || "Invalid email or password!");
+>>>>>>> 5c6c36bfa0044bb29ff1e488d287aec5d0784622
     }
   };
 
@@ -75,19 +102,27 @@ export default function Login() {
             className="bg-white rounded-md"
           />
 
+<<<<<<< HEAD
           {/* Forgot Link */}
+=======
+>>>>>>> 5c6c36bfa0044bb29ff1e488d287aec5d0784622
           <div className="flex justify-end -mt-2">
             <a href="/forget" className="text-blue-200 underline text-sm">
               Forgot Password?
             </a>
           </div>
 
+<<<<<<< HEAD
           {/* Error Show */}
           {error && (
             <p className="text-red-300 text-center font-medium">{error}</p>
           )}
 
           {/* Login Button */}
+=======
+          {error && <Alert severity="error">{error}</Alert>}
+
+>>>>>>> 5c6c36bfa0044bb29ff1e488d287aec5d0784622
           <Button
             variant="contained"
             color="primary"

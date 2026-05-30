@@ -1,7 +1,15 @@
+<<<<<<< HEAD
 import React, { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { TextField, Button } from "@mui/material";
 import { AccountCircle, Email, Lock } from "@mui/icons-material";
+=======
+﻿import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Alert, TextField, Button } from "@mui/material";
+import { AccountCircle, Email, Lock } from "@mui/icons-material";
+import { signup } from "../api/auth";
+>>>>>>> 5c6c36bfa0044bb29ff1e488d287aec5d0784622
 
 export default function Signup() {
     const [form, setForm] = useState({
@@ -9,12 +17,18 @@ export default function Signup() {
         email: "",
         password: ""
     });
+<<<<<<< HEAD
     const Navigate=useNavigate()
+=======
+    const [error, setError] = useState("");
+    const navigate = useNavigate();
+>>>>>>> 5c6c36bfa0044bb29ff1e488d287aec5d0784622
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
+<<<<<<< HEAD
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -30,6 +44,25 @@ export default function Signup() {
         alert("Signup Successfully!");
         Navigate('/login')
 
+=======
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!form.name || !form.email || !form.password) {
+            setError("Please fill all fields!");
+            return;
+        }
+
+        try {
+            setError("");
+            await signup(form);
+            navigate("/login");
+        } catch (err) {
+            setError(
+                err?.response?.data?.message || "Signup failed. Please try again."
+            );
+        }
+>>>>>>> 5c6c36bfa0044bb29ff1e488d287aec5d0784622
     };
 
     return (
@@ -38,9 +71,13 @@ export default function Signup() {
             style={{
                 backgroundImage: "url('https://images.unsplash.com/photo-1586773860418-d37222d8fce3')",
             }}
+<<<<<<< HEAD
 
         >
             {/* 3D GLASS CARD */}
+=======
+        >
+>>>>>>> 5c6c36bfa0044bb29ff1e488d287aec5d0784622
             <div className="backdrop-blur-xl bg-white/20 shadow-2xl border border-white/30 rounded-3xl p-10 w-full max-w-md transform hover:scale-105 transition-all duration-500">
 
                 <h1 className="text-3xl font-bold text-center text-white mb-6 drop-shadow-lg">
@@ -48,6 +85,10 @@ export default function Signup() {
                 </h1>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
+<<<<<<< HEAD
+=======
+                    {error && <Alert severity="error">{error}</Alert>}
+>>>>>>> 5c6c36bfa0044bb29ff1e488d287aec5d0784622
 
                     <div className="flex items-center gap-2">
                         <AccountCircle className="text-white" />
@@ -57,7 +98,22 @@ export default function Signup() {
                             label="Full Name"
                             name="name"
                             onChange={handleChange}
+<<<<<<< HEAD
                             InputProps={{ className: "text-white" }}
+=======
+                            InputProps={{
+                                className: "text-white",
+                                sx: {
+                                    '& input': {
+                                        padding: '14px 12px',
+                                        boxSizing: 'border-box',
+                                    },
+                                    height: '56px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                }
+                            }}
+>>>>>>> 5c6c36bfa0044bb29ff1e488d287aec5d0784622
                             InputLabelProps={{ className: "text-white" }}
                         />
                     </div>
@@ -70,7 +126,22 @@ export default function Signup() {
                             label="Email"
                             name="email"
                             onChange={handleChange}
+<<<<<<< HEAD
                             InputProps={{ className: "text-white" }}
+=======
+                            InputProps={{
+                                className: "text-white",
+                                sx: {
+                                    '& input': {
+                                        padding: '14px 14px',
+                                        boxSizing: 'border-box',
+                                    },
+                                    height: '56px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                }
+                            }}
+>>>>>>> 5c6c36bfa0044bb29ff1e488d287aec5d0784622
                             InputLabelProps={{ className: "text-white" }}
                         />
                     </div>
@@ -84,7 +155,22 @@ export default function Signup() {
                             label="Password"
                             name="password"
                             onChange={handleChange}
+<<<<<<< HEAD
                             InputProps={{ className: "text-white" }}
+=======
+                            InputProps={{
+                                className: "text-white",
+                                sx: {
+                                    '& input': {
+                                        padding: '14px 14px',
+                                        boxSizing: 'border-box',
+                                    },
+                                    height: '56px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                }
+                            }}
+>>>>>>> 5c6c36bfa0044bb29ff1e488d287aec5d0784622
                             InputLabelProps={{ className: "text-white" }}
                         />
                     </div>
@@ -94,7 +180,11 @@ export default function Signup() {
                         fullWidth
                         variant="contained"
                         sx={{
+<<<<<<< HEAD
                             paddingY: "10px",
+=======
+                            paddingY: "9px",
+>>>>>>> 5c6c36bfa0044bb29ff1e488d287aec5d0784622
                             background: "linear-gradient(135deg, #00a8ff, #0072ff)",
                             borderRadius: "12px",
                             fontWeight: "bold",
@@ -108,4 +198,8 @@ export default function Signup() {
             </div>
         </div>
     );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 5c6c36bfa0044bb29ff1e488d287aec5d0784622
