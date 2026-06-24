@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import {
   Add,
   Edit,
@@ -10,6 +10,7 @@ import {
   Badge,
 } from "@mui/icons-material";
 import {
+  Alert,
   Button,
   Dialog,
   DialogTitle,
@@ -17,67 +18,143 @@ import {
   DialogActions,
   TextField,
 } from "@mui/material";
+import {
+  createPatient,
+  deletePatient,
+  listPatients,
+  updatePatient,
+} from "../api/patients";
+
+const emptyForm = {
+  name: "",
+  email: "",
+  phone: "",
+  age: "",
+  gender: "Male",
+  bloodGroup: "",
+  address: "",
+  medicalHistory: "",
+};
 
 export default function Patients() {
   const [open, setOpen] = useState(false);
-  const [editIndex, setEditIndex] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
+  const [patients, setPatients] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [form, setForm] = useState(emptyForm);
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    age: "",
-    gender: "",
-  });
-
-  const [patients, setPatients] = useState([
-    {
-      name: "Rahul Kumar",
-      email: "rahul@example.com",
-      phone: "9876543211",
-      age: "29",
-      gender: "Male",
-    },
-    {
-      name: "Priya Sharma",
-      email: "priya@example.com",
-      phone: "9899001123",
-      age: "25",
-      gender: "Female",
-    },
-  ]);
-
-  const handleOpen = () => {
-    setForm({ name: "", email: "", phone: "", age: "", gender: "" });
-    setEditIndex(null);
-    setOpen(true);
+  const clearAuthAndRedirect = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("currentUser");
+    window.location.href = "/login";
   };
 
-  const handleSave = () => {
-    if (editIndex !== null) {
-      const updated = [...patients];
-      updated[editIndex] = form;
-      setPatients(updated);
-    } else {
-      setPatients([...patients, form]);
+  const fetchPatients = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const res = await listPatients();
+      setPatients(Array.isArray(res?.data?.data) ? res.data.data : []);
+    } catch (err) {
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        clearAuthAndRedirect();
+        return;
+      }
+      setError(err?.response?.data?.message || "Failed to load patients.");
+    } finally {
+      setLoading(false);
     }
-    setOpen(false);
   };
 
-  const handleEdit = (index) => {
-    setForm(patients[index]);
-    setEditIndex(index);
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  const handleOpen = (patient = null) => {
+    setError("");
+    if (patient) {
+      setSelectedId(patient._id);
+      setForm({
+        name: patient.name || "",
+        email: patient.email || "",
+        phone: patient.phone || "",
+        age: patient.age?.toString?.() || "",
+        gender: patient.gender || "Male",
+        bloodGroup: patient.bloodGroup || "",
+        address: patient.address || "",
+        medicalHistory: patient.medicalHistory || "",
+      });
+    } else {
+      setSelectedId(null);
+      setForm(emptyForm);
+    }
     setOpen(true);
   };
 
-  const handleDelete = (index) => {
-    setPatients(patients.filter((_, i) => i !== index));
+  const handleSave = async () => {
+    if (!form.name || !form.email || !form.phone || !form.age || !form.gender) {
+      setError("Please fill name, email, phone, age and gender.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const payload = {
+        ...form,
+        age: Number(form.age),
+        email: form.email.trim().toLowerCase(),
+      };
+
+      const res = selectedId
+        ? await updatePatient(selectedId, payload)
+        : await createPatient(payload);
+
+      const savedPatient = res?.data?.data;
+      if (savedPatient) {
+        setPatients((prev) =>
+          selectedId
+            ? prev.map((item) => (item._id === selectedId ? savedPatient : item))
+            : [savedPatient, ...prev]
+        );
+      } else {
+        fetchPatients();
+      }
+
+      setOpen(false);
+    } catch (err) {
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        clearAuthAndRedirect();
+        return;
+      }
+      setError(err?.response?.data?.message || "Failed to save patient.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      setLoading(true);
+      setError("");
+      await deletePatient(id);
+      setPatients((prev) => prev.filter((patient) => patient._id !== id));
+    } catch (err) {
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        clearAuthAndRedirect();
+        return;
+      }
+      setError(err?.response?.data?.message || "Failed to delete patient.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="p-6">
-
-      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold flex items-center gap-3">
           <Person className="text-green-600" />
@@ -87,18 +164,20 @@ export default function Patients() {
         <Button
           variant="contained"
           startIcon={<Add />}
-          onClick={handleOpen}
+          onClick={() => handleOpen()}
           sx={{ background: "linear-gradient(to right, #16a34a, #22c55e)" }}
+          disabled={loading}
         >
           Add Patient
         </Button>
       </div>
 
-      {/* Patients Grid */}
+      {error ? <Alert severity="error" className="mb-4">{error}</Alert> : null}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {patients.map((pat, index) => (
+        {patients.map((pat) => (
           <div
-            key={index}
+            key={pat._id}
             className="bg-white p-5 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 border border-gray-200"
           >
             <h2 className="text-xl font-bold text-green-700 mb-2">
@@ -121,12 +200,12 @@ export default function Patients() {
               <Wc fontSize="small" /> Gender: {pat.gender}
             </p>
 
-            {/* Action Buttons */}
             <div className="flex justify-between mt-4">
               <Button
                 variant="outlined"
                 startIcon={<Edit />}
-                onClick={() => handleEdit(index)}
+                onClick={() => handleOpen(pat)}
+                disabled={loading}
               >
                 Edit
               </Button>
@@ -135,7 +214,8 @@ export default function Patients() {
                 variant="outlined"
                 color="error"
                 startIcon={<Delete />}
-                onClick={() => handleDelete(index)}
+                onClick={() => handleDelete(pat._id)}
+                disabled={loading}
               >
                 Delete
               </Button>
@@ -144,15 +224,11 @@ export default function Patients() {
         ))}
       </div>
 
-      {/* Add/Edit Dialog */}
-      <Dialog open={open} onClose={() => setOpen(false)}>
-        <DialogTitle>
-          {editIndex !== null ? "Edit Patient" : "Add Patient"}
-        </DialogTitle>
+      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>{selectedId ? "Edit Patient" : "Add Patient"}</DialogTitle>
 
         <DialogContent dividers>
           <div className="flex flex-col gap-4 py-2">
-
             <TextField
               label="Full Name"
               fullWidth
@@ -176,34 +252,58 @@ export default function Patients() {
 
             <TextField
               label="Age"
+              type="number"
               fullWidth
               value={form.age}
               onChange={(e) => setForm({ ...form, age: e.target.value })}
             />
 
             <TextField
-              label="Gender (Male/Female/Other)"
+              label="Gender"
               fullWidth
               value={form.gender}
               onChange={(e) => setForm({ ...form, gender: e.target.value })}
+            />
+
+            <TextField
+              label="Blood Group"
+              fullWidth
+              value={form.bloodGroup}
+              onChange={(e) => setForm({ ...form, bloodGroup: e.target.value })}
+            />
+
+            <TextField
+              label="Address"
+              fullWidth
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+            />
+
+            <TextField
+              label="Medical History"
+              fullWidth
+              multiline
+              minRows={3}
+              value={form.medicalHistory}
+              onChange={(e) => setForm({ ...form, medicalHistory: e.target.value })}
             />
           </div>
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
+          <Button onClick={() => setOpen(false)} disabled={loading}>
+            Cancel
+          </Button>
           <Button
             variant="contained"
-            sx={{
-              background: "linear-gradient(to right, #16a34a, #22c55e)",
-            }}
+            sx={{ background: "linear-gradient(to right, #16a34a, #22c55e)" }}
             onClick={handleSave}
+            disabled={loading}
           >
-            Save
+            {loading ? "Saving..." : "Save"}
           </Button>
         </DialogActions>
       </Dialog>
     </div>
   );
 }
-

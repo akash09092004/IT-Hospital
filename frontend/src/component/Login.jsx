@@ -1,7 +1,27 @@
-﻿import React, { useState } from "react";
-import { Alert, TextField, Button } from "@mui/material";
+import React, { useState } from "react";
+import { Alert, Box, Button, TextField, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { login } from "../api/auth";
+
+const Field = ({ label, ...props }) => (
+  <Box>
+    <Typography variant="body2" sx={{ mb: 0.75, color: "rgba(255,255,255,0.85)", fontWeight: 600 }}>
+      {label}
+    </Typography>
+    <TextField
+      {...props}
+      fullWidth
+      variant="outlined"
+      sx={{
+        backgroundColor: "rgba(255,255,255,0.92)",
+        borderRadius: 1,
+      }}
+      InputProps={{
+        sx: { height: 56 },
+      }}
+    />
+  </Box>
+);
 
 export default function Login() {
   const navigate = useNavigate();
@@ -46,23 +66,17 @@ export default function Login() {
         </h2>
 
         <form className="flex flex-col gap-5" onSubmit={handleLogin}>
-          <TextField
-            fullWidth
+          <Field
             label="Email"
-            variant="outlined"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="bg-white rounded-md"
           />
 
-          <TextField
-            fullWidth
+          <Field
             label="Password"
             type="password"
-            variant="outlined"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="bg-white rounded-md"
           />
 
           <div className="flex justify-end -mt-2">

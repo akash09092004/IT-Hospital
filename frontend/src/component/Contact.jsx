@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import axios from "axios";
-import { TextField, Button, Card, CardContent } from "@mui/material";
+﻿import React, { useState } from "react";
+import { TextField, Button, Card, CardContent, Alert } from "@mui/material";
 import { LocationOn, Phone, Email } from "@mui/icons-material";
+import { createContact } from "../api/contact";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -9,6 +9,9 @@ export default function Contact() {
     email: "",
     message: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -17,29 +20,32 @@ export default function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!formData.name || !formData.email || !formData.message) {
+      setError("Please fill all fields.");
+      return;
+    }
+
     try {
-      const res = await axios.post("https://691af3a62d8d78557570d735.mockapi.io/hospital", formData);
-
-      alert("Message Sent Successfully!");
-      console.log(res.data);
-
-      // Form reset
+      setLoading(true);
+      setError("");
+      setSuccess("");
+      await createContact(formData);
+      setSuccess("Message sent successfully!");
       setFormData({ name: "", email: "", message: "" });
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Failed to send message!");
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to send message.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="w-full min-h-screen bg-gray-100 p-6">
-
       <h1 className="text-4xl font-bold text-center mb-8 text-blue-600">
         Contact Us
       </h1>
 
       <div className="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto">
-
         <div>
           <Card className="mb-6">
             <CardContent>
@@ -78,11 +84,12 @@ export default function Contact() {
 
         <Card className="shadow-xl">
           <CardContent>
-
             <h2 className="text-2xl font-semibold mb-4">Send a Message</h2>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            {success ? <Alert severity="success" className="mb-4">{success}</Alert> : null}
+            {error ? <Alert severity="error" className="mb-4">{error}</Alert> : null}
 
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <TextField
                 label="Full Name"
                 name="name"
@@ -113,17 +120,19 @@ export default function Contact() {
                 onChange={handleChange}
               />
 
-              <Button type="submit" variant="contained" color="primary" size="large">
-                Send Message
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                size="large"
+                disabled={loading}
+              >
+                {loading ? "Sending..." : "Send Message"}
               </Button>
-
             </form>
-
           </CardContent>
         </Card>
-
       </div>
-
     </div>
   );
 }
