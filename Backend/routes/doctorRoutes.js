@@ -7,15 +7,16 @@ const {
   updateDoctor,
   deleteDoctor,
 } = require("../controllers/doctorController");
-const { protect, adminOnly } = require("../middleware/authMiddleware");
+const { protect } = require("../middleware/authMiddleware");
 
 // Public - sab log dekh sakte hain
 router.get("/", getDoctors);            // GET /api/doctors
 router.get("/:id", getDoctor);          // GET /api/doctors/:id
 
 // Admin only
-router.post("/", protect, adminOnly, addDoctor);            // POST /api/doctors
-router.put("/:id", protect, adminOnly, updateDoctor);       // PUT /api/doctors/:id
-router.delete("/:id", protect, adminOnly, deleteDoctor);    // DELETE /api/doctors/:id
+router.post("/", protect, addDoctor);            // POST /api/doctors
+router.put("/:id", protect, updateDoctor);       // PUT /api/doctors/:id
+router.delete("/:id", protect, deleteDoctor);    // DELETE /api/doctors/:id
 
 module.exports = router;
+

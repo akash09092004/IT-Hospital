@@ -1,10 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const dns = require ("dns");
+const dns = require("dns");
 
-dns.setServers(["1.1.1.1","8.8.8.8"])
-
+dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
 const connectDB = require("./config/db");
 
@@ -17,14 +16,29 @@ connectDB();
 const app = express();
 
 // ===== MIDDLEWARE =====
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://it-hospital.vercel.app",
-  ],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      const allowedOrigins = new Set([
+        "http://localhost:5173",
+        "http://localhost:4173",
+        "http://localhost:3000",
+        "https://it-hospital.vercel.app",
+      ]);
+
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.has(origin) || /^http:\/\/localhost:\d+$/.test(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`Not allowed by CORS: ${origin}`));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -36,11 +50,12 @@ app.use("/api/appointments", require("./routes/appointmentRoutes"));
 app.use("/api/staff", require("./routes/staffRoutes"));
 app.use("/api/billing", require("./routes/billingRoutes"));
 app.use("/api/contact", require("./routes/contactRoutes"));
+app.use("/api/careers", require("./routes/careerRoutes"));
 
 // ===== HOME ROUTE =====
 app.get("/", (req, res) => {
   res.json({
-    message: "🏥 Hospital Management System API is running!",
+    message: "Hospital Management System API is running!",
     version: "1.0.0",
     routes: {
       auth: "/api/auth",
@@ -50,6 +65,7 @@ app.get("/", (req, res) => {
       staff: "/api/staff",
       billing: "/api/billing",
       contact: "/api/contact",
+      careers: "/api/careers",
     },
   });
 });
@@ -68,5 +84,5 @@ app.use((err, req, res, next) => {
 // ===== START SERVER =====
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });

@@ -7,12 +7,13 @@ const {
   updateAppointment,
   deleteAppointment,
 } = require("../controllers/appointmentController");
-const { protect, adminOnly } = require("../middleware/authMiddleware");
+const { protect } = require("../middleware/authMiddleware");
 
 router.get("/", protect, getAppointments);                          // GET /api/appointments
 router.get("/:id", protect, getAppointment);                        // GET /api/appointments/:id
 router.post("/", protect, addAppointment);                          // POST /api/appointments
-router.put("/:id", protect, adminOnly, updateAppointment);          // PUT /api/appointments/:id
-router.delete("/:id", protect, adminOnly, deleteAppointment);       // DELETE /api/appointments/:id
+router.put("/:id", protect, updateAppointment);          // PUT /api/appointments/:id
+router.delete("/:id", protect, deleteAppointment);       // DELETE /api/appointments/:id
 
 module.exports = router;
+

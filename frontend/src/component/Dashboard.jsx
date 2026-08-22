@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Dashboard,
   LocalHospital,
@@ -10,12 +10,50 @@ import {
   Settings,
   Logout,
   Notifications,
+  Menu,
+  Close,
 } from "@mui/icons-material";
 
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@mui/material";
 
 export default function AdminDashboard() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const adminLinks = [
+    { to: "/dashboard", label: "Dashboard", icon: <Dashboard /> },
+    { to: "/admin", label: "Home Dashboard", icon: <Dashboard /> },
+    { to: "/admin/doctors", label: "Doctors", icon: <LocalHospital /> },
+    { to: "/admin/patients", label: "Patients", icon: <Group /> },
+    { to: "/admin/query", label: "Query", icon: <Group /> },
+    { to: "/admin/appointments", label: "Appointments", icon: <Event /> },
+    { to: "/admin/staff", label: "Staff", icon: <People /> },
+    { to: "/admin/billing", label: "Billing", icon: <AccountBalance /> },
+    { to: "/admin/reports", label: "Reports", icon: <Assessment /> },
+    { to: "/admin/settings", label: "Settings", icon: <Settings /> },
+    { to: "/logout", label: "Logout", icon: <Logout />, isLogout: true },
+  ];
+
+  const AdminNavigation = () => (
+    <ul className="space-y-4">
+      {adminLinks.map(({ to, label, icon, isLogout }) => (
+        <li key={to}>
+          <Link
+            to={to}
+            onClick={() => setIsMenuOpen(false)}
+            className={`flex items-center gap-3 font-medium transition-colors ${
+              isLogout
+                ? "mt-5 text-red-600 hover:text-red-800"
+                : "text-gray-700 hover:text-blue-600"
+            }`}
+          >
+            {icon} {label}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+
   return (
     <div className="flex min-h-screen bg-gray-100">
 
@@ -23,85 +61,55 @@ export default function AdminDashboard() {
       <aside className="w-64 bg-white shadow-xl p-5 hidden md:block">
         <h1 className="text-2xl font-bold text-blue-700 mb-8">Admin Panel</h1>
 
-        <ul className="space-y-4">
+        <AdminNavigation />
+      </aside>
 
-          <li>
-            <Link to="/dashboard" className="flex items-center gap-3 text-blue-600 font-semibold hover:text-blue-800">
-              <Dashboard /> Dashboard
-            </Link>
-          </li>
-
-          <li>
-            <Link to="/admin" className="flex items-center gap-3 hover:text-blue-600">
-              <Dashboard /> Home Dashboard
-            </Link>
-          </li>
-
-          <li>
-            <Link to="/admin/doctors" className="flex items-center gap-3 hover:text-blue-600">
-              <LocalHospital /> Doctors
-            </Link>
-          </li>
-
-          <li>
-            <Link to="/admin/patients" className="flex items-center gap-3 hover:text-blue-600">
-              <Group /> Patients
-            </Link>
-          </li>
-           
-           <li>
-            <Link to="/admin/query" className="flex items-center gap-3 hover:text-blue-600">
-              <Group /> Query
-            </Link>
-          </li>
-
-          <li>
-            <Link to="/admin/appointments" className="flex items-center gap-3 hover:text-blue-600">
-              <Event /> Appointments
-            </Link>
-          </li>
-
-          <li>
-            <Link to="/admin/staff" className="flex items-center gap-3 hover:text-blue-600">
-              <People /> Staff
-            </Link>
-          </li>
-
-          <li>
-            <Link to="/admin/billing" className="flex items-center gap-3 hover:text-blue-600">
-              <AccountBalance /> Billing
-            </Link>
-          </li>
-
-          <li>
-            <Link to="/admin/reports" className="flex items-center gap-3 hover:text-blue-600">
-              <Assessment /> Reports
-            </Link>
-          </li>
-
-          <li>
-            <Link to="/admin/settings" className="flex items-center gap-3 hover:text-blue-600">
-              <Settings /> Settings
-            </Link>
-          </li>
-
-          <li>
-            <Link to="/logout" className="flex items-center gap-3 text-red-600 hover:text-red-800 mt-5">
-              <Logout /> Logout
-            </Link>
-          </li>
-
-        </ul>
+      {/* Mobile admin navigation */}
+      {isMenuOpen && (
+        <button
+          type="button"
+          aria-label="Close admin menu"
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          onClick={() => setIsMenuOpen(false)}
+        />
+      )}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-72 overflow-y-auto bg-white p-5 shadow-2xl transition-transform duration-300 md:hidden ${
+          isMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="mb-8 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-blue-700">Admin Panel</h1>
+          <button
+            type="button"
+            aria-label="Close admin menu"
+            className="rounded-lg p-1 text-gray-700 hover:bg-gray-100"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            <Close />
+          </button>
+        </div>
+        <AdminNavigation />
       </aside>
 
 
       {/* ---------------- MAIN CONTENT ---------------- */}
-      <main className="flex-1 p-6">
+      <main className="min-w-0 flex-1 p-3 sm:p-6">
+
+        <button
+          type="button"
+          aria-label="Open admin menu"
+          aria-expanded={isMenuOpen}
+          onClick={() => setIsMenuOpen(true)}
+          className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 px-4 py-3 font-semibold text-white shadow-md md:hidden"
+        >
+          <Menu /> Admin Menu
+        </button>
 
         {/* Top Header */}
-        <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-md mb-6">
-          <h2 className="text-2xl font-semibold">Dashboard Overview</h2>
-          <div className="flex items-center gap-6">
+        <div className="flex justify-between items-center gap-3 bg-white p-4 rounded-xl shadow-md mb-6">
+          <h2 className="text-lg sm:text-2xl font-semibold">Dashboard Overview</h2>
+          <div className="flex shrink-0 items-center gap-3 sm:gap-6">
             <Notifications className="text-gray-500 cursor-pointer hover:text-gray-700" />
             <div className="font-medium">Admin</div>
           </div>
